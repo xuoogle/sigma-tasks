@@ -7,11 +7,9 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import org.bson.Document;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 
 public class MainClass {
     public static void main(String[] args) {
@@ -20,8 +18,16 @@ public class MainClass {
         mapper.findAndRegisterModules();
         try {
             Config config = mapper.readValue(new File("./config.yaml"), Config.class);
+            // 生产状态表
+            MongoClient mongoClient = MongoClients.create(config.getMongodbUri());
+            MongoDatabase database = mongoClient.getDatabase(config.getProductionStatusTableDatabaseName());
+            MongoCollection statusCollection = database.getCollection(config.getProductionStatusTableStatusCollectionName());
+            MongoCollection dataCollection = database.getCollection(config.getProductionStatusTableDataCollectionName());
 
-            System.out.println(config.getProductionStatusTablePath());
+            StatusTable productionStatusTable = new StatusTable(config.getProductionStatusTablePath(),
+                    statusCollection, dataCollection);
+            productionStatusTable.sync();
+
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
