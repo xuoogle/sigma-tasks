@@ -1,0 +1,11 @@
+# 生产状态表
+productionStatusTablePath: \\192.168.1.11\sigma\Private\Operations\PLAN\plan chart\产品状态表.xlsx
+productionStatusTableDatabaseName: marking
+productionStatusTableStatusCollectionName: product_status_table_status
+productionStatusTableDataCollectionName: product_status_table_data
+
+# 装配状态表
+assemblyStatusTablePath: \\192.168.1.11\sigma\Private\Documentation Centre\Register\FAIR Register.xlsx
+assemblyStatusTableDatabaseName: marking
+assemblyStatusTableStatusCollectionName: assembly_status_table_status
+assemblyStatusTableDataCollectionName: assembly_status_table_data

@@ -14,19 +14,18 @@ import java.util.Arrays;
 
 public class ProductionStatusTable {
     private static final String url = "C:\\eta\\p\\sigma\\fair\\auto\\excels\\产品状态表.xlsx";
-    private static final String
-
-    public ProductionStatusTable() {
-
+    private Config config;
+    public ProductionStatusTable(Config config) {
+        this.config = config;
     }
 
     public void parse() {
         // 连接mongodb
-        String  uri = "mongodb://r:r@localhost:27017/";
+        String  uri = config.getMongodbUri();
 
         MongoClient mongoClient = MongoClients.create(uri);
-        MongoDatabase database = mongoClient.getDatabase("marking");
-        MongoCollection collection = database.getCollection("product_status_table_status");
+        MongoDatabase database = mongoClient.getDatabase(config.getProductionStatusTableDatabaseName());
+        MongoCollection collection = database.getCollection(config.getProductionStatusTableDataCollectionName());
         Document doc = (Document) collection.find().first();
         System.out.println(doc.toJson());
 
