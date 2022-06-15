@@ -1,10 +1,12 @@
 public class Config {
     private String productionStatusTablePath;
+    private String productionStatusTableSheetName;
     private String productionStatusTableDatabaseName;
-
     private String productionStatusTableStatusCollectionName;
     private String productionStatusTableDataCollectionName;
+
     private String assemblyStatusTablePath;
+    private String assemblyStatusTableSheetName;
     private String assemblyStatusTableDatabaseName;
     private String assemblyStatusTableStatusCollectionName;
     private String assemblyStatusTableDataCollectionName;
@@ -24,6 +26,22 @@ public class Config {
 
     public void setAssemblyStatusTableStatusCollectionName(String assemblyStatusTableStatusCollectionName) {
         this.assemblyStatusTableStatusCollectionName = assemblyStatusTableStatusCollectionName;
+    }
+
+    public String getProductionStatusTableSheetName() {
+        return productionStatusTableSheetName;
+    }
+
+    public void setProductionStatusTableSheetName(String productionStatusTableSheetName) {
+        this.productionStatusTableSheetName = productionStatusTableSheetName;
+    }
+
+    public String getAssemblyStatusTableSheetName() {
+        return assemblyStatusTableSheetName;
+    }
+
+    public void setAssemblyStatusTableSheetName(String assemblyStatusTableSheetName) {
+        this.assemblyStatusTableSheetName = assemblyStatusTableSheetName;
     }
 
     public String getProductionStatusTableDatabaseName() {
