@@ -6,9 +6,8 @@ import org.bson.Document;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
+import java.lang.reflect.Array;
+import java.util.*;
 
 public class StatusTable {
     private String excelPath;
@@ -40,43 +39,79 @@ public class StatusTable {
             Sheet sheet = workbook.getSheetAt(0);
 
             Set workIds = new HashSet();
+            ArrayList actionModels = new ArrayList();
             for (int i = 1; i <= sheet.getLastRowNum(); i++) {
+                // 行校验
                 Row row = sheet.getRow(i);
                 if(row == null) {
                     System.out.printf("忽略空行: %d\n", i);
                     continue;
                 }
+                // created_date
                 Cell createdDateCell = row.getCell(0);
                 long createdDate = 0;
                 if(createdDateCell.getCellType() == CellType.NUMERIC) {
                     createdDate = createdDateCell.getDateCellValue().getTime();
                 }
-//                long created_date = createdDate != null ? createdDate.getTime() : 0;
+
+                // pn
                 Cell pnCell = row.getCell(1);
-                String pn = pnCell == null ? "" : pnCell.getStringCellValue();
-
-                Cell workIdCell = row.getCell(2);
-
-                String workId = workIdCell !=null ? workIdCell.getStringCellValue() : "";
-                if(workId == "") {
-                    System.out.printf("忽略workId为空的行: %d\n", i);
+                if(pnCell == null || pnCell.getCellType() != CellType.STRING) {
+                    System.out.printf("%d: Cell.pn 为空,或者类型不正确\n", i);
                     continue;
                 }
+                String pn = pnCell == null ? "" : pnCell.getStringCellValue();
 
-                int quantity = (int) row.getCell(3).getNumericCellValue();
-                String orderId = row.getCell(4).toString();
-                String customer = row.getCell(6).toString();
-                Date dueDate = row.getCell(11).getDateCellValue();
-                long due_date = dueDate != null ? dueDate.getTime() : 0;
-                // System.out.printf("%d: %s %s, %s, %d\r\n", i + 1, workId, orderId, customer, due_date);
+                // workId
+                Cell workIdCell = row.getCell(2);
+                if(workIdCell == null || workIdCell.getCellType() != CellType.STRING) {
+                    System.out.printf("%d: Cell.workId为空, 或者类型不正确\n", i);
+                    continue;
+                }
+                String workId = workIdCell.getStringCellValue();
+
+                // quantity
+                Cell quantityCell  = row.getCell(3);
+                if(quantityCell == null || quantityCell.getCellType() != CellType.NUMERIC) {
+                    System.out.printf("%d: Cell.quantity为空, 或者类型不正确\n", i);
+                    continue;
+                }
+                int quantity = (int) quantityCell.getNumericCellValue();
+
+                // orderId
+                Cell orderIdCell = row.getCell(4);
+                if(orderIdCell == null || orderIdCell.getCellType() != CellType.STRING) {
+                    System.out.printf("%d: Cell.orderId为空, 或者类型不正确\n", i);
+                    continue;
+                }
+                String orderId = orderIdCell.getStringCellValue();
+
+                // customer
+                Cell customerCell = row.getCell(6);
+                String customer = customerCell == null ? "" : customerCell.toString();
+
+                // due_date
+                Cell dueDateCell = row.getCell(11);
+                long dueDate = 0;
+                if(dueDateCell != null && dueDateCell.getCellType() == CellType.NUMERIC) {
+                    dueDate = dueDateCell.getDateCellValue().getTime();
+                }
+
                 if(workIds.contains(workId)) {
                     System.out.printf("第%d行重复workId: %s\r\n", i + 1, workId);
                 }
-//                System.out.printf("repeat: %d: %s %s, %s, %d\r\n", i + 1, workId, orderId, customer, due_date);
                 workIds.add(workId);
 
+                actionModels.add(new UpdateOneModel<>(new Document("name", "A Sample Movie"),
+                        new Document("$set", new Document("name", "An Old Sample Movie")),
+                        new UpdateOptions().upsert(true)))
+
             }
-            System.out.println(workIds.size());
+
+            // 更新数据集合
+            dataCollection.bulkWrite(actionModels);
+            // 更新状态集合
+
         } catch (IOException | InvalidFormatException e) {
             throw new RuntimeException(e);
         }
