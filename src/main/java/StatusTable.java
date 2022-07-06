@@ -4,8 +4,11 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.UpdateOneModel;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.result.UpdateResult;
+import org.apache.poi.hssf.usermodel.HSSFFormulaEvaluator;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFFormulaEvaluator;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.bson.Document;
 import org.bson.conversions.Bson;
@@ -53,7 +56,8 @@ public class StatusTable {
             Set workIds = new HashSet();
             ArrayList actionModels = new ArrayList();
             Pattern patternWorkid = Pattern.compile("[Ww]*-*(\\d+)");
-            System.out.printf("%d 行\n", sheet.getLastRowNum());
+            FormulaEvaluator formulaEvaluator = new XSSFFormulaEvaluator((XSSFWorkbook) workbook);
+
             for (int i = 1; i <= Math.min(sheet.getLastRowNum(), 30000); i++) {
                 int rows = i + 1;
                 // 行校验
@@ -76,7 +80,7 @@ public class StatusTable {
                 // workId: 不能为空
                 Cell workIdCell = row.getCell(2);
                 if (workIdCell == null) {
-                    System.out.printf("%d: Cell.workId为空\n", i);
+                    System.out.printf("%d: Cell.workId为空\n", rows);
                     continue;
                 }
                 String workId = workIdCell.toString().trim();
@@ -106,7 +110,18 @@ public class StatusTable {
 
                 // orderId
                 Cell orderIdCell = row.getCell(4);
-                String orderId = orderIdCell == null ? "" : orderIdCell.toString();
+                String orderId;
+                if(orderIdCell.getCellType() == CellType.NUMERIC) {
+
+                    orderId = String.format("%.0f",orderIdCell.getNumericCellValue());
+                } else if( orderIdCell.getCellType() == CellType.STRING ) {
+                    orderId = orderIdCell.getStringCellValue();
+                } else if( orderIdCell.getCellType() == CellType.BLANK ) {
+                    orderId = "";
+                } else {
+                    System.out.printf("错误的orderid列类型: %d行: %s type: %s", rows, orderIdCell.toString(), orderIdCell.getCellType());
+                    return;
+                }
 
                 // customer
                 Cell customerCell = row.getCell(6);
@@ -130,11 +145,12 @@ public class StatusTable {
                 workIds.add(workId);
 
                 Document queryDocument = new Document("workid", workId);
+
                 Document setDocument = new Document("workid", workId)
                         .append("created_date", createdDate)
                         .append("pn", pn)
                         .append("quantity", quantity)
-                        .append("orderid", orderId)
+                        .append("orderids",Arrays.asList(orderId.split("[\\s,|]")))
                         .append("customer", customer)
                         .append("due_date", dueDate);
                 actionModels.add(new UpdateOneModel<>(queryDocument,
@@ -142,7 +158,7 @@ public class StatusTable {
                         new UpdateOptions().upsert(true)));
 
             }
-            System.out.printf("actionModels: %d\n",actionModels.size());
+            System.out.printf("更新项目: %d\n",actionModels.size());
             // 更新数据集合
             dataCollection.bulkWrite(actionModels);
             // 最后更新状态集合
