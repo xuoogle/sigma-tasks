@@ -69,9 +69,16 @@ public class StatusTable {
                 // created_date
                 Cell createdDateCell = row.getCell(0);
                 long createdDate = 0;
+
+                if(createdDateCell == null) {
+                    break;
+                }
+
                 if (createdDateCell.getCellType() == CellType.NUMERIC) {
                     createdDate = createdDateCell.getDateCellValue().getTime();
                 }
+
+//                System.out.printf("%d行: %s\n", rows, new Date(createdDate));
 
                 // pn
                 Cell pnCell = row.getCell(1);
@@ -104,7 +111,7 @@ public class StatusTable {
                     if (cellType == CellType.NUMERIC || cellType == CellType.FORMULA) {
                         quantity = quantityCell.getNumericCellValue();
                     } else {
-                        System.out.printf("%d quantity: %s, type: %s", rows, quantityCell.toString(), quantityCell.getCellType());
+                        System.out.printf("%d quantity: %s, type: %s\n", rows, quantityCell.toString(), quantityCell.getCellType());
                     }
                 }
 

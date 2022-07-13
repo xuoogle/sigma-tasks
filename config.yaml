@@ -2,7 +2,7 @@
 mongodbUri: "mongodb://r:r@localhost:27017"
 
 # 生产状态表
-productionStatusTablePath: test/产品状态表.xlsx
+productionStatusTablePath: D:\sigma\tasks\test/产品状态表.xlsx
 # productionStatusTablePath: \\192.168.1.11\sigma\Private\Operations\PLAN\plan chart\产品状态表.xlsx
 productionStatusTableSheetName: 状态表
 
@@ -11,7 +11,7 @@ productionStatusTableStatusCollectionName: product_status_table_status
 productionStatusTableDataCollectionName: product_status_table_data
 
 # 装配状态表
-assemblyStatusTablePath: test/装配产品动态表.xlsx
+assemblyStatusTablePath: D:\sigma\tasks\test/装配产品动态表.xlsx
 #assemblyStatusTablePath: \\192.168.1.11\sigma\Private\Operations\Assembly\Planning\装配产品动态表.xlsx
 assemblyStatusTableSheetName: 装配产品动态表
 assemblyStatusTableDatabaseName: marking
